@@ -13,5 +13,5 @@ func TestHealth(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/health", nil)
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, req)
-	assert.Equal(t, 200, http.StatusOK)
+	assert.Equal(t, w.Code, http.StatusOK)
 }
