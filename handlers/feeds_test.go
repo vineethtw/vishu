@@ -32,9 +32,8 @@ func Test_CanAcceptANewFeed(t *testing.T) {
 	mockFeedService.AssertExpectations(t)
 }
 
-func Test_ReturnsBadRequestWhenThereIsAMalformedRequest(t *testing.T) {
+func Test_ReturnsBadRequestWhenThereIsNoPayloadInRequest(t *testing.T) {
 	mockFeedService := new(MockedFeedService)
-	mockFeedService.On("CreateNew", mock.Anything, mock.Anything).Return()
 
 	handler := Create(mockFeedService)
 	body := strings.NewReader("{\"something\":\"else\"}")
@@ -43,5 +42,19 @@ func Test_ReturnsBadRequestWhenThereIsAMalformedRequest(t *testing.T) {
 	handler.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, "payload cannot be empty\n", w.Body.String())
 	mockFeedService.AssertExpectations(t)
+}
+
+func Test_ReturnsBadRequestWhenThereRequestIsNotValidJSON(t *testing.T) {
+	mockFeedService := new(MockedFeedService)
+
+	handler := Create(mockFeedService)
+	body := strings.NewReader("not a json")
+	req, _ := http.NewRequest("POST", "/feeds", body)
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "invalid character")
 }

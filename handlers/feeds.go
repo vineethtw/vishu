@@ -22,7 +22,8 @@ func Create(feedsService services.FeedService) http.Handler {
 			return
 		}
 		if feedRequest.Payload == "" {
-			http.Error(writer, errors.New("payload cannot be an empty string").Error(), http.StatusBadRequest)
+			http.Error(writer, errors.New("payload cannot be empty").Error(), http.StatusBadRequest)
+			return
 		}
 
 		feedsService.CreateNew("invoice", feedRequest.Payload)
