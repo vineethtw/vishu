@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 
@@ -17,8 +18,11 @@ func Create(feedsService services.FeedService) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		body, _ := ioutil.ReadAll(req.Body)
 		if err := json.Unmarshal(body, &feedRequest); err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
+			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
+		}
+		if feedRequest.Payload == "" {
+			http.Error(writer, errors.New("payload cannot be an empty string").Error(), http.StatusBadRequest)
 		}
 
 		feedsService.CreateNew("invoice", feedRequest.Payload)

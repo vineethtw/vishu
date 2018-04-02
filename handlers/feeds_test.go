@@ -27,8 +27,21 @@ func Test_CanAcceptANewFeed(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/feeds", body)
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, req)
-	assert.Equal(t, w.Code, http.StatusOK)
-	assert.Equal(t, "", w.Body.String())
 
+	assert.Equal(t, w.Code, http.StatusOK)
+	mockFeedService.AssertExpectations(t)
+}
+
+func Test_ReturnsBadRequestWhenThereIsAMalformedRequest(t *testing.T) {
+	mockFeedService := new(MockedFeedService)
+	mockFeedService.On("CreateNew", mock.Anything, mock.Anything).Return()
+
+	handler := Create(mockFeedService)
+	body := strings.NewReader("{\"something\":\"else\"}")
+	req, _ := http.NewRequest("POST", "/feeds", body)
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 	mockFeedService.AssertExpectations(t)
 }
